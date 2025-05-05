@@ -5,6 +5,8 @@ import { Container, Typography, Box } from '@mui/material';
 import { useLDContextBridge } from '../../providers/LaunchDarkly';
 import LDContextBuilder from '../../components/LDContextBuilder';
 import LDAdmin from '../../components/LDAdmin';
+import LDEnvironment from '../../components/LDEnvironment';
+
 
 export default function HomePage() {
   const { context } = useLDContextBridge();
@@ -16,8 +18,10 @@ export default function HomePage() {
         Welcome to Your LaunchDarkly Kill Panel
       </Typography>
       <Typography variant="body1" gutterBottom>
-        Set your LD context and access the admin console.
+        Set your LD Environment and Context to access the admin console.
       </Typography>
+
+      <LDEnvironment />
 
       <LDContextBuilder />
 

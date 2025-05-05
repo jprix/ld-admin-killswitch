@@ -8,8 +8,10 @@ import React, {
   useState,
 } from 'react';
 import { LDProvider, useLDClient } from 'launchdarkly-react-client-sdk';
+import { getLDEnv } from '../lib/ldEnv';
 
-const clientSideID = process.env.NEXT_PUBLIC_LD_CLIENT_ID;
+
+const clientSideID = typeof window !== 'undefined' ? getLDEnv().clientId : '';
 
 // ---- Fallback Context ----
 const fallbackContext = {

@@ -14,6 +14,8 @@ import {
   Box,
 } from '@mui/material';
 import theme from '../theme';
+import { getLDEnv } from '../lib/ldEnv';
+
 import { ThemeProvider } from '@mui/material/styles';
 import { useLDClient } from 'launchdarkly-react-client-sdk';
 
@@ -50,23 +52,22 @@ const LDAdmin = () => {
 
   const toggleFlag = async (flagKey: string, currentState: boolean) => {
     const newState = !currentState;
-    const LD_API_KEY = process.env.NEXT_PUBLIC_LD_API_KEY;
-    const LD_PROJECT_KEY = process.env.NEXT_PUBLIC_LD_PROJECT_KEY;
-    const LD_ENVIRONMENT_KEY = process.env.NEXT_PUBLIC_LD_ENVIRONMENT_KEY;
+    const { apiKey, projectKey, environmentKey } = getLDEnv();
+    
 
     try {
       const response = await fetch(
-        `https://app.launchdarkly.com/api/v2/flags/${LD_PROJECT_KEY}/${flagKey}`,
+        `https://app.launchdarkly.com/api/v2/flags/${projectKey}/${flagKey}`,
         {
           method: 'PATCH',
           headers: {
-            Authorization: LD_API_KEY || '',
+            Authorization: apiKey || '',
             'Content-Type': 'application/json',
           },
           body: JSON.stringify([
             {
               op: 'replace',
-              path: `/environments/${LD_ENVIRONMENT_KEY}/on`,
+              path: `/environments/${environmentKey}/on`,
               value: newState,
             },
           ]),
