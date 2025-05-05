@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import Head from 'next/head';
 import {
   Container,
@@ -20,7 +19,6 @@ import { ThemeProvider } from '@mui/material/styles';
 import { useLDClient } from 'launchdarkly-react-client-sdk';
 
 const LDAdmin = () => {
-  const router = useRouter();
   const ldClient = useLDClient();
   const [flags, setFlags] = useState<Record<string, boolean>>({});
   const [isLoading, setIsLoading] = useState(true);

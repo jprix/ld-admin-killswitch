@@ -41,6 +41,7 @@ export default function LDContextBuilder() {
       setOpen(false);
     } catch (err) {
       setError('Invalid JSON format');
+        console.error('Error parsing JSON:', err);
     }
   };
 

@@ -44,10 +44,15 @@ export default function LDEnvironment() {
       setError(null);
       setOpen(false);
       location.reload(); // refresh app to reinitialize LD
-    } catch (err: any) {
-      setError(err.message);
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+      } else {
+        setError('An unknown error occurred');
+      }
     }
   };
+  
 
   return (
     <>
