@@ -21,39 +21,39 @@ const LDAdmin = () => {
   const router = useRouter();
   const ldClient = useLDClient();
   const [flags, setFlags] = useState<Record<string, boolean>>({});
-  const [isLoading, setIsLoading] = useState(false);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!ldClient) return;
 
-    const fetchFlags = async () => {
+    const fetchAndSetFlags = async () => {
       const allFlags = await ldClient.allFlags();
-      console.log('Fetched flags:', allFlags);
+      console.log('🔁 Updated flags:', allFlags);
       setFlags(allFlags);
       setIsLoading(false);
     };
 
-    fetchFlags();
+    // Initial fetch
+    fetchAndSetFlags();
 
-    const userContext = ldClient.getContext();
+    // Subscribe to any flag changes (after context reidentification)
+    ldClient.on('change', () => {
+      console.log('🔄 Flag change detected');
+      fetchAndSetFlags();
+    });
 
-    console.log('User Context:', userContext), flags;
-    const adminCheck = userContext?.custom?.featureAccess === 'admin';
-    setIsAdmin(adminCheck);
-
-    if (!adminCheck) {
-      alert('You do not have access to this page.');
-      router.replace('/');
-    }
-  }, [ldClient, router]);
+    // Cleanup on unmount
+    return () => {
+      ldClient.off('change', fetchAndSetFlags);
+    };
+  }, [ldClient]);
 
   const toggleFlag = async (flagKey: string, currentState: boolean) => {
     const newState = !currentState;
     const LD_API_KEY = process.env.NEXT_PUBLIC_LD_API_KEY;
     const LD_PROJECT_KEY = process.env.NEXT_PUBLIC_LD_PROJECT_KEY;
     const LD_ENVIRONMENT_KEY = process.env.NEXT_PUBLIC_LD_ENVIRONMENT_KEY;
-  
+
     try {
       const response = await fetch(
         `https://app.launchdarkly.com/api/v2/flags/${LD_PROJECT_KEY}/${flagKey}`,
@@ -72,9 +72,9 @@ const LDAdmin = () => {
           ]),
         }
       );
-  
+
       if (!response.ok) throw new Error('Failed to update flag');
-  
+
       setFlags((prev) => ({
         ...prev,
         [flagKey]: newState,
@@ -83,7 +83,6 @@ const LDAdmin = () => {
       console.error('Error updating flag:', error);
     }
   };
-  
 
   if (isLoading) {
     return <CircularProgress />;

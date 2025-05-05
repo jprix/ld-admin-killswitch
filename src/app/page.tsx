@@ -1,23 +1,29 @@
 'use client';
 
-import { Container, Typography, Button } from '@mui/material';
+import { Container, Typography, Box } from '@mui/material';
+
+import { useLDContextBridge } from '../../providers/LaunchDarkly';
+import LDContextBuilder from '../../components/LDContextBuilder';
 import LDAdmin from '../../components/LDAdmin';
 
 export default function HomePage() {
+  const { context } = useLDContextBridge();
+  const isUserSet = context?.key !== 'fallback-guest';
+
   return (
-    <>
     <Container maxWidth="md" sx={{ mt: 8 }}>
       <Typography variant="h3" gutterBottom>
         Welcome to Your LaunchDarkly Kill Panel
       </Typography>
       <Typography variant="body1" gutterBottom>
-        This single-page app is styled with MUI and ready for feature flagging.
+        Set your LD context and access the admin console.
       </Typography>
-      <Button variant="contained" color="primary">
-        Get Started
-      </Button>
+
+      <LDContextBuilder />
+
+      <Box mt={4}>
+        {isUserSet && <LDAdmin />}
+      </Box>
     </Container>
-    <LDAdmin />
-    </>
   );
 }
