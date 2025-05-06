@@ -5,7 +5,6 @@ import Head from 'next/head';
 import {
   Container,
   Typography,
-  FormControlLabel,
   Switch,
   CircularProgress,
   Card,
@@ -19,7 +18,7 @@ import type { LDEvaluationDetail } from 'launchdarkly-js-sdk-common';
 import { getLDEnv } from '../lib/ldEnv';
 
 type FlagDetail = {
-  value: any;
+  value: boolean;
   variation?: number;
   reason?: string;
 };
