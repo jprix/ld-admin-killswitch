@@ -12,37 +12,50 @@ import {
   CardContent,
   Box,
 } from '@mui/material';
+import { ThemeProvider } from '@mui/material/styles';
 import theme from '../theme';
+import { useLDClient } from 'launchdarkly-react-client-sdk';
+import type { LDEvaluationDetail } from 'launchdarkly-js-sdk-common';
 import { getLDEnv } from '../lib/ldEnv';
 
-import { ThemeProvider } from '@mui/material/styles';
-import { useLDClient } from 'launchdarkly-react-client-sdk';
+type FlagDetail = {
+  value: any;
+  variation?: number;
+  reason?: string;
+};
 
 const LDAdmin = () => {
   const ldClient = useLDClient();
-  const [flags, setFlags] = useState<Record<string, boolean>>({});
+  const [flags, setFlags] = useState<Record<string, FlagDetail>>({});
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     if (!ldClient) return;
 
     const fetchAndSetFlags = async () => {
-      const allFlags = await ldClient.allFlags();
-      console.log('🔁 Updated flags:', allFlags);
-      setFlags(allFlags);
+      const rawFlags = ldClient.allFlags();
+      const enriched: Record<string, FlagDetail> = {};
+
+      for (const key of Object.keys(rawFlags)) {
+        const detail: LDEvaluationDetail = ldClient.variationDetail(key, rawFlags[key]);
+        enriched[key] = {
+          value: detail.value,
+          variation: detail.variationIndex,
+          reason: detail.reason?.kind ?? '—',
+        };
+      }
+
+      setFlags(enriched);
       setIsLoading(false);
     };
 
-    // Initial fetch
     fetchAndSetFlags();
 
-    // Subscribe to any flag changes (after context reidentification)
     ldClient.on('change', () => {
       console.log('🔄 Flag change detected');
       fetchAndSetFlags();
     });
 
-    // Cleanup on unmount
     return () => {
       ldClient.off('change', fetchAndSetFlags);
     };
@@ -51,7 +64,6 @@ const LDAdmin = () => {
   const toggleFlag = async (flagKey: string, currentState: boolean) => {
     const newState = !currentState;
     const { apiKey, projectKey, environmentKey } = getLDEnv();
-    
 
     try {
       const response = await fetch(
@@ -76,16 +88,17 @@ const LDAdmin = () => {
 
       setFlags((prev) => ({
         ...prev,
-        [flagKey]: newState,
+        [flagKey]: {
+          ...prev[flagKey],
+          value: newState,
+        },
       }));
     } catch (error) {
       console.error('Error updating flag:', error);
     }
   };
 
-  if (isLoading) {
-    return <CircularProgress />;
-  }
+  if (isLoading) return <CircularProgress />;
 
   return (
     <ThemeProvider theme={theme}>
@@ -101,22 +114,56 @@ const LDAdmin = () => {
         {Object.keys(flags).length === 0 ? (
           <Typography>No flags found.</Typography>
         ) : (
-          Object.entries(flags).map(([flagKey, isFlagOn]) => (
+          Object.entries(flags).map(([flagKey, flag]) => (
             <Card key={flagKey} sx={{ mb: 2, p: 2 }}>
               <CardContent>
-                <Typography variant="h6">{flagKey}</Typography>
-                <Box sx={{ mt: 1 }}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={isFlagOn}
-                        onChange={() => toggleFlag(flagKey, isFlagOn)}
-                      />
-                    }
-                    label={`Status: ${isFlagOn ? 'Enabled' : 'Disabled'}`}
-                  />
-                </Box>
-              </CardContent>
+  <Typography variant="h6" gutterBottom>
+    {flagKey}
+  </Typography>
+
+  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+    <Switch
+      checked={flag.value === true}
+      onChange={() => toggleFlag(flagKey, flag.value === true)}
+      color="primary"
+    />
+    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+      Status: {flag.value === true ? 'Enabled' : 'Disabled'}
+    </Typography>
+  </Box>
+
+  <Box
+    sx={{
+      backgroundColor: '#f9f9f9',
+      border: '1px solid #ddd',
+      borderRadius: 1,
+      p: 2,
+      mt: 1,
+      fontFamily: 'monospace',
+      whiteSpace: 'pre-wrap',
+      wordBreak: 'break-word',
+    }}
+  >
+    <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+      Value:
+    </Typography>
+    {typeof flag.value === 'object' ? (
+      <pre style={{ margin: 0 }}>{JSON.stringify(flag.value, null, 2)}</pre>
+    ) : (
+      <Typography variant="body2">{String(flag.value)}</Typography>
+    )}
+  </Box>
+
+  <Box sx={{ mt: 2 }}>
+    <Typography variant="body2">
+      <strong>Variation:</strong> {flag.variation ?? '—'}
+    </Typography>
+    <Typography variant="body2">
+      <strong>Reason:</strong> {flag.reason ?? '—'}
+    </Typography>
+  </Box>
+</CardContent>
+
             </Card>
           ))
         )}
