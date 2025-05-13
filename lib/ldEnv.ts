@@ -3,5 +3,6 @@ export const getLDEnv = () => ({
     apiKey: localStorage.getItem('NEXT_PUBLIC_LD_API_KEY') ?? '',
     projectKey: localStorage.getItem('NEXT_PUBLIC_LD_PROJECT_KEY') ?? '',
     environmentKey: localStorage.getItem('NEXT_PUBLIC_LD_ENVIRONMENT_KEY') ?? '',
+    serverSdkKey: process.env.LD_SERVER_SDK_KEY || '',
   });
   

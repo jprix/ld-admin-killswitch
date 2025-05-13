@@ -106,8 +106,8 @@ const LDAdmin = () => {
           <title>LaunchDarkly Admin</title>
         </Head>
 
-        <Typography variant="h4" sx={{ mt: 4, mb: 2 }}>
-          LaunchDarkly Feature Flags
+        <Typography variant="h4" sx={{ mt: 4, mb: 2, textAlign: 'center' }}>
+          LaunchDarkly Feature Flags:
         </Typography>
 
         {Object.keys(flags).length === 0 ? (
@@ -116,56 +116,55 @@ const LDAdmin = () => {
           Object.entries(flags).map(([flagKey, flag]) => (
             <Card key={flagKey} sx={{ mb: 2, p: 2 }}>
               <CardContent>
-  <Typography variant="h6" gutterBottom>
-    {flagKey}
-  </Typography>
+        <Typography variant="h6" gutterBottom>
+          {flagKey}
+        </Typography>
 
-  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-    <Switch
-      checked={flag.value === true}
-      onChange={() => toggleFlag(flagKey, flag.value === true)}
-      color="primary"
-    />
-    <Typography variant="body1" sx={{ fontWeight: 500 }}>
-      Status: {flag.value === true ? 'Enabled' : 'Disabled'}
-    </Typography>
-  </Box>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+          <Switch
+            checked={flag.value === true}
+            onChange={() => toggleFlag(flagKey, flag.value === true)}
+            color="primary"
+          />
+          <Typography variant="body1" sx={{ fontWeight: 500 }}>
+            Status: {flag.value === true ? 'Enabled' : 'Disabled'}
+          </Typography>
+        </Box>
 
-  <Box
-    sx={{
-      backgroundColor: '#f9f9f9',
-      border: '1px solid #ddd',
-      borderRadius: 1,
-      p: 2,
-      mt: 1,
-      fontFamily: 'monospace',
-      whiteSpace: 'pre-wrap',
-      wordBreak: 'break-word',
-    }}
-  >
-    <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
-      Value:
-    </Typography>
-    {typeof flag.value === 'object' ? (
-      <pre style={{ margin: 0 }}>{JSON.stringify(flag.value, null, 2)}</pre>
-    ) : (
-      <Typography variant="body2">{String(flag.value)}</Typography>
-    )}
-  </Box>
+        <Box
+          sx={{
+            backgroundColor: '#f9f9f9',
+            border: '1px solid #ddd',
+            borderRadius: 1,
+            p: 2,
+            mt: 1,
+            fontFamily: 'monospace',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+          }}
+        >
+          <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+            Value:
+          </Typography>
+          {typeof flag.value === 'object' ? (
+            <pre style={{ margin: 0 }}>{JSON.stringify(flag.value, null, 2)}</pre>
+          ) : (
+            <Typography variant="body2">{String(flag.value)}</Typography>
+          )}
+        </Box>
 
-  <Box sx={{ mt: 2 }}>
-    <Typography variant="body2">
-      <strong>Variation:</strong> {flag.variation ?? '—'}
-    </Typography>
-    <Typography variant="body2">
-      <strong>Reason:</strong> {flag.reason ?? '—'}
-    </Typography>
-  </Box>
-</CardContent>
-
-            </Card>
-          ))
-        )}
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="body2">
+            <strong>Variation:</strong> {flag.variation ?? '—'}
+          </Typography>
+          <Typography variant="body2">
+            <strong>Reason:</strong> {flag.reason ?? '—'}
+          </Typography>
+        </Box>
+      </CardContent>
+                  </Card>
+                ))
+              )}
       </Container>
     </ThemeProvider>
   );

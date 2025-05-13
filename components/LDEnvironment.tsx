@@ -57,7 +57,7 @@ export default function LDEnvironment() {
   return (
     <>
       <Box mb={2}>
-        <Button variant="outlined" onClick={() => setOpen(true)}>
+        <Button variant="contained" onClick={() => setOpen(true)}>
           Configure LD Environment
         </Button>
       </Box>
